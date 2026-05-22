@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
-DEFAULT_PAGES = 3
+DEFAULT_PAGES = 5
 DEFAULT_OUTPUT = "quotes_data.csv"
 
 if len(sys.argv) > 1:
@@ -22,12 +22,16 @@ options.add_argument("--headless")
 options.add_argument("--window-size=1920,1080")
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
+print("Starting parser...")
+
 try:
     driver.get("https://quotes.toscrape.com/login")
     time.sleep(1)
 
     driver.find_element(By.ID, "username").send_keys("maket-nsu")
     driver.find_element(By.ID, "password").send_keys("maket123")
+
+    print("Authorization has been completed.")
 
     login_btn = driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary")
     driver.execute_script("arguments[0].click();", login_btn)
@@ -57,12 +61,15 @@ try:
             time.sleep(1)
             page += 1
         else:
+            print("Limit exceeded or no pages left.")
             break
 
     with open(DEFAULT_OUTPUT, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["Текст цитаты", "Автор", "Ссылка на автора", "Теги"])
         writer.writerows(all_data)
+
+    print(f"The parsing has been completed successfully!\n The data saved in {DEFAULT_OUTPUT}.")
 
 finally:
     driver.quit()
